@@ -1,73 +1,50 @@
 /**
  * Scanner.java
- * Implementation of a simple scanner (lexer) to tokenize a stream of input characters into a stream of Tokens.
- * Uses the Adhoc approach.
+ * Implements a simple Scanner that returns single characters as tokens.
+ * Recognizes single-digit numbers and the operators + and -.
  */
 public class Scanner {
-    private final char[] input;
-    private int cursor;
 
-    public Scanner(String input) {
-        // Adds a null character ('\0') at the end to simplify EOF logic
-        this.input = (input + '\0').toCharArray();
-        this.cursor = 0;
+    private byte[] input;
+    private int current; 
+
+	public Scanner (byte[] input) {
+        this.input = input;
     }
 
     // --- Helper Methods ---
     private char peek() {
-        return input[cursor];
+        if (current < input.length)
+            return (char) input[current];
+        return '\0';
     }
-    
+
     // Move to the next character in the input
     private void advance() {
-        cursor++;
+        char ch = peek();
+        if (ch != '\0') {
+            current++;
+        }
     }
 
     // --- Main Method to Get the Next Token ---
-    public Token getNextToken() {
-        
-        // 1. Ignore Whitespace
-        while (Character.isWhitespace(peek())) {
-            advance();
+    public char nextToken() {
+        char ch = peek();
+
+        if (Character.isDigit(ch)) {
+			advance();
+            return ch;
         }
 
-        char currentChar = peek();
-
-        // 2. Recognize End Of File (EOF)
-        if (currentChar == '\0') {
-            return new Token(Token.EOF);
-        }
-
-        // 3. Recognize Numbers (rule: [0-9]+)
-        if (Character.isDigit(currentChar)) {
-            StringBuilder lexeme = new StringBuilder();
-
-            // Loop to consume all consecutive digits
-            while (Character.isDigit(peek())) {
-                lexeme.append(peek());
-                advance();
-            }
-            // Returns the NUMBER token with the complete lexeme (e.g., "45", "876")
-            return new Token(Token.NUMBER, lexeme.toString());
-        }
-
-        // 4. Recognize Single-Character Operators
-        switch (currentChar) {
+        switch (ch) {
             case '+':
-                advance();
-                return new Token(Token.PLUS, "+");
             case '-':
                 advance();
-                return new Token(Token.MINUS, "-");
-            case '*':
-                advance();
-                return new Token(Token.MULT, "*");
-            case '/':
-                advance();
-                return new Token(Token.DIV, "/");
+                return ch;
             default:
-                // If the character is not recognized, it's a lexical error
-                throw new Error("Lexical error: Unexpected character found: '" + currentChar + "'");
+                break;
         }
+
+        return '\0'; // EOF or unrecognized character
     }
 }
