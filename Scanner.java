@@ -1,7 +1,7 @@
 /**
  * Scanner.java
  * Implements a simple Scanner (Lexer) for arithmetic expressions.
- * This version recognizes multi-digit numbers and operators.
+ * This version recognizes multi-digit numbers, operators and skips whitespace.
  */
 public class Scanner {
 
@@ -28,6 +28,17 @@ public class Scanner {
     }
 
     /**
+     * Skips whitespace characters (space, tab, newline, etc.).
+     */
+    private void skipWhitespace() {
+        char ch = peek();
+        while (ch == ' ' || ch == '\r' || ch == '\t' || ch == '\n') {
+            advance();
+            ch = peek();
+        }
+    }
+
+    /**
      * Logic to recognize multi-digit numbers ([0-9]+).
      * @return A Token of type NUMBER.
      */
@@ -49,9 +60,12 @@ public class Scanner {
      * @return The next Token.
      */
     public Token nextToken() {
+        
+        skipWhitespace(); // Skip any whitespace before processing the next token
+
         char ch = peek();
 
-        // 1. Skip whitespace
+        // 1. Check for end of input
         if (ch == '0') {
             advance();
             return new Token(TokenType.NUMBER, Character.toString(ch));
@@ -67,9 +81,9 @@ public class Scanner {
                 advance();
                 return new Token(TokenType.MINUS, "-");
             case '\0':
-                return new Token(TokenType.EOF, "EOF");
+                return new Token(TokenType.EOF, "EOF"); // End of file
             default:
-                throw new Error("lexical error at " + ch); // EOF or unrecognized character
+                throw new Error("lexical error at " + ch); // unrecognized character
         }
     }
 }

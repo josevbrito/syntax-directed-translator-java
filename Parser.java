@@ -1,16 +1,16 @@
 /**
  * Parser.java
  * Implements a Recursive Descent Parser for simple arithmetic expressions.
- * This version uses a Scanner that returns single characters as tokens.
+ * This version handles multi-digit numbers, operators and whitespace.
  * Grammar:
- *   expr -> digit oper
- *   oper -> + digit oper | - digit oper | ε
- *   digit -> digit -> 0 | .. | 9
+ *   expr -> number oper
+ *   oper -> + number oper | - number oper | ε
+ *   number -> [0-9]+
  */
 public class Parser {
     
     private Scanner scan;
-    private char currentToken; 
+    private Token currentToken;
 
     /**
      * Constructor for the Parser.
@@ -21,53 +21,66 @@ public class Parser {
         scan = new Scanner(input);
         currentToken = scan.nextToken();
     }
+
     // --- Helper Methods ---
+
+    /**
+     * Fetches the next token from the scanner.
+     */
     private void nextToken () {
         currentToken = scan.nextToken();
     }
 
     /**
-     * Matches the current token with the expected token.
+     * Matches the current token's type with the expected token type.
      * Advances to the next token if they match; otherwise, throws a syntax error.
-     * @param t The expected token character.
+     * @param t The expected TokenType.
      */
-    private void match(char t) {
-        if (currentToken == t) {
+    private void match(TokenType t) {
+        if (currentToken.type == t) {
             nextToken();
         }else {
-            throw new Error("syntax error");
+            throw new Error("syntax error: expected " + t + " but found " + currentToken.type);
         }
    }
     
     // --- Grammar Rules ---
+
+    /**
+     * Entry point for parsing.
+     */
     public void parse() {
         expr();
     }
 
-    // Grammar Rule: expr -> digit oper
+    /**
+     * Grammar Rule: expr -> number oper
+     */
     void expr() {
-       digit();
+       number();
        oper();
     }
 
-    void digit() {
-        if (Character.isDigit(currentToken)) {
-			System.out.println("push " + currentToken);
-            match(currentToken);
-        } else {
-           throw new Error("syntax error");
-        }
+    /**
+     * Grammar Rule: number -> [0-9]+
+     */
+    void number () {
+        System.out.println("push " + currentToken.lexeme); 
+        match(TokenType.NUMBER);
     }
 
+    /**
+     * Grammar Rule: oper -> + number oper | - number oper | ε
+     */
     void oper() {
-        if (currentToken == '+') {
-            match('+');
-            digit();
+        if (currentToken.type == TokenType.PLUS) {
+            match(TokenType.PLUS);
+            number();
             System.out.println("add");
             oper();
-        } else if (currentToken == '-') {
-            match('-');
-            digit();
+        } else if (currentToken.type == TokenType.MINUS) {
+            match(TokenType.MINUS);
+            number();
             System.out.println("sub");
             oper();
         }
