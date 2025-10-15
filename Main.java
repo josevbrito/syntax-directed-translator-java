@@ -4,11 +4,15 @@
  */
 public class Main {
     public static void main(String[] args) {
-        // Test input with a 'let' statement
-        String input = "let a = 42 + 5 - 8;";
+        // Test input with multiple 'let' and 'print' statements
+        String input = """
+            let a = 42 + 5 - 8;
+            let b = 56 + 8;
+            print a + b + 6;        
+                """;
         
-        // Create a Parser instance and parse the input
         Parser p = new Parser(input.getBytes());
+        
         p.parse();
     }
 }

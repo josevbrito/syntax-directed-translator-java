@@ -4,7 +4,6 @@ import java.util.Map;
 /**
  * Scanner.java
  * Implements a simple Scanner (Lexer) for arithmetic expressions.
- * This version supports identifiers, assignment statements with `let`, keywords and new operators.
  */
 public class Scanner {
 
@@ -17,6 +16,7 @@ public class Scanner {
     static {
         keywords = new HashMap<>();
         keywords.put("let",    TokenType.LET);
+        keywords.put("print",  TokenType.PRINT);
     }
 
     public Scanner (byte[] input) {

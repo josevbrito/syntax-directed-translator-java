@@ -9,10 +9,11 @@ public enum TokenType {
 
     // Keywords
     LET,
+    PRINT,
 
     // Literals
     NUMBER,
-    IDENT, 
+    IDENT,
 
     // End of file
     EOF

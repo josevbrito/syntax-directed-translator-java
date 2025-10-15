@@ -1,9 +1,13 @@
 /**
  * Parser.java
- * Implements a Recursive Descent Parser for simple arithmetic expressions.
- * This version handles assignment statements with `let`, identifiers, keywords, and new operators.
+ * Implements a Recursive Descent Parser for a simple language with variables and print statements.
+ *
  * Grammar:
+ *   program -> statements
+ *   statements -> statement*
+ *   statement -> printStatement | letStatement
  *   letStatement -> 'let' identifier '=' expression ';'
+ *   printStatement -> 'print' expression ';'
  *   expr -> term oper
  *   oper -> + term oper | - term oper | ε
  *   term -> number | identifier
@@ -49,10 +53,42 @@ public class Parser {
     // --- Grammar Rules ---
 
     /**
-     * Entry point for parsing. Starts by expecting a 'let' statement.
+     * Entry point for parsing.
      */
     public void parse() {
-        letStatement();
+        statements();
+    }
+
+    /**
+     * Grammar Rule: statements -> statement*
+     */
+    void statements () {
+        while (currentToken.type != TokenType.EOF) {
+            statement();
+        }
+    }
+
+    /**
+     * Grammar Rule: statement -> printStatement | letStatement
+     */
+    void statement () {
+        if (currentToken.type == TokenType.PRINT) {
+            printStatement();
+        } else if (currentToken.type == TokenType.LET) {
+            letStatement();
+        } else {
+            throw new Error("syntax error: unexpected token " + currentToken.type + ", expected a statement.");
+        }
+    }
+
+    /**
+     * Grammar Rule: printStament -> 'print' expression ';'
+     */
+    void printStatement () {
+        match(TokenType.PRINT);
+        expr();
+        System.out.println("print");
+        match(TokenType.SEMICOLON);
     }
 
     /**
