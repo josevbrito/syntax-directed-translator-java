@@ -4,10 +4,16 @@
  */
 
 public enum TokenType {
-    // Operators
-    PLUS, MINUS,
+    // Operators and Punctuation
+    PLUS, MINUS, EQ, SEMICOLON,
+
+    // Keywords
+    LET,
+
     // Literals
     NUMBER,
+    IDENT, 
+
     // End of file
     EOF
 }

@@ -4,12 +4,11 @@
  */
 public class Main {
     public static void main(String[] args) {
-        // Test input with whitespace
-        String input = "45  + 89   -       876";
+        // Test input with a 'let' statement
+        String input = "let a = 42 + 5 - 8;";
         
-        // Passes the input to the Parser constructor
+        // Create a Parser instance and parse the input
         Parser p = new Parser(input.getBytes());
-        
         p.parse();
     }
 }

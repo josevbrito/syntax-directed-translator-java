@@ -1,12 +1,23 @@
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Scanner.java
  * Implements a simple Scanner (Lexer) for arithmetic expressions.
- * This version recognizes multi-digit numbers, operators and skips whitespace.
+ * This version supports identifiers, assignment statements with `let`, keywords and new operators.
  */
 public class Scanner {
 
     private byte[] input;
-    private int current; 
+    private int current;
+
+    // Map to hold keywords and their corresponding TokenTypes
+    private static final Map<String, TokenType> keywords;
+ 
+    static {
+        keywords = new HashMap<>();
+        keywords.put("let",    TokenType.LET);
+    }
 
     public Scanner (byte[] input) {
         this.input = input;
@@ -21,10 +32,21 @@ public class Scanner {
 
     // Move to the next character in the input
     private void advance() {
-        char ch = peek();
-        if (ch != '\0') {
+        if (current < input.length) {
             current++;
         }
+    }
+
+    // Check if a character is a letter or underscore
+    private boolean isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') ||
+               (c >= 'A' && c <= 'Z') ||
+                c == '_';
+    }
+
+    // Check if a character is a letter, number or underscore
+    private boolean isAlphaNumeric(char c) {
+        return isAlpha(c) || Character.isDigit(c);
     }
 
     /**
@@ -55,24 +77,50 @@ public class Scanner {
     }
 
     /**
+     * Logic to recognize identifiers and keywords.
+     * @return A Token of type IDENT or a keyword (e.g., LET).
+     */
+    private Token identifier() {
+        // Consumes all consecutive alphanumeric characters
+        int start = current;
+        while (isAlphaNumeric(peek())) {
+            advance();
+        }
+    
+        // Extracts the substring (the lexeme) that forms the identifier
+        String id = new String(input, start, current - start);
+        // Checks if the identifier is a keyword
+        TokenType type = keywords.get(id);
+        // If not a keyword, it's an identifier
+        if (type == null) {
+            type = TokenType.IDENT;
+        }
+
+        // Returns a Token of the appropriate type
+        return new Token(type, id);
+    }
+
+    /**
      * Returns the next Token from the input.
-     *
      * @return The next Token.
      */
     public Token nextToken() {
-        
+
         skipWhitespace(); // Skip any whitespace before processing the next token
 
         char ch = peek();
 
-        // 1. Check for end of input
-        if (ch == '0') {
-            advance();
-            return new Token(TokenType.NUMBER, Character.toString(ch));
-        } else if (Character.isDigit(ch))
-            return number();
+        // 1. Check for identifiers and keywords
+        if (isAlpha(ch)) {
+           return identifier();
+        }
 
-        // 2. Check for operators and EOF
+        // 2. Check for numbers
+        if (Character.isDigit(ch)) {
+            return number();
+        }
+
+        // 3. Check for operators, punctuation and EOF
         switch (ch) {
             case '+':
                 advance();
@@ -80,10 +128,16 @@ public class Scanner {
             case '-':
                 advance();
                 return new Token(TokenType.MINUS, "-");
+            case '=':
+                advance();
+                return new Token(TokenType.EQ,"=");
+            case ';':
+               advance();
+               return new Token(TokenType.SEMICOLON,";");
             case '\0':
                 return new Token(TokenType.EOF, "EOF"); // End of file
             default:
-                throw new Error("lexical error at " + ch); // unrecognized character
+                throw new Error("lexical error at '" + ch + "'");
         }
     }
 }

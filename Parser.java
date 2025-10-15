@@ -1,10 +1,12 @@
 /**
  * Parser.java
  * Implements a Recursive Descent Parser for simple arithmetic expressions.
- * This version handles multi-digit numbers, operators and whitespace.
+ * This version handles assignment statements with `let`, identifiers, keywords, and new operators.
  * Grammar:
- *   expr -> number oper
- *   oper -> + number oper | - number oper | ε
+ *   letStatement -> 'let' identifier '=' expression ';'
+ *   expr -> term oper
+ *   oper -> + term oper | - term oper | ε
+ *   term -> number | identifier
  *   number -> [0-9]+
  */
 public class Parser {
@@ -39,7 +41,7 @@ public class Parser {
     private void match(TokenType t) {
         if (currentToken.type == t) {
             nextToken();
-        }else {
+        } else {
             throw new Error("syntax error: expected " + t + " but found " + currentToken.type);
         }
    }
@@ -47,43 +49,70 @@ public class Parser {
     // --- Grammar Rules ---
 
     /**
-     * Entry point for parsing.
+     * Entry point for parsing. Starts by expecting a 'let' statement.
      */
     public void parse() {
-        expr();
+        letStatement();
     }
 
     /**
-     * Grammar Rule: expr -> number oper
+     * Grammar Rule: letStatement -> 'let' identifier '=' expression ';'
+     */
+    void letStatement () {
+        match(TokenType.LET);
+        String id = currentToken.lexeme;
+        match(TokenType.IDENT);
+        match(TokenType.EQ);
+        expr();
+        System.out.println("pop " + id);
+        match(TokenType.SEMICOLON);
+    }
+
+    /**
+     * Grammar Rule: expr -> term oper
      */
     void expr() {
-       number();
+       term();
        oper();
     }
 
     /**
+     * Grammar Rule: term -> number | identifier
+     */
+    void term () {
+        if (currentToken.type == TokenType.NUMBER) {
+            number();
+        } else if (currentToken.type == TokenType.IDENT) {
+            System.out.println("push " + currentToken.lexeme);
+            match(TokenType.IDENT);
+        } else {
+            throw new Error("syntax error: unexpected token " + currentToken.type);
+        }
+    }
+    
+    /**
      * Grammar Rule: number -> [0-9]+
      */
     void number () {
-        System.out.println("push " + currentToken.lexeme); 
+        System.out.println("push " + currentToken.lexeme);
         match(TokenType.NUMBER);
     }
 
     /**
-     * Grammar Rule: oper -> + number oper | - number oper | ε
+     * Grammar Rule: oper -> + term oper | - term oper | ε
      */
     void oper() {
         if (currentToken.type == TokenType.PLUS) {
             match(TokenType.PLUS);
-            number();
+            term();
             System.out.println("add");
             oper();
         } else if (currentToken.type == TokenType.MINUS) {
             match(TokenType.MINUS);
-            number();
+            term();
             System.out.println("sub");
             oper();
         }
-        // ε-production: do nothing (end of recursion)
+        // ε-production: do nothing
     }
 }
